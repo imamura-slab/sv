@@ -3,7 +3,7 @@
 module cnt60(
 	     input wire       clk, n_rst,
 	     input wire       CEN,
-	     input wire       DEC, INC, 
+	     input wire       CLR, INC, 
 	     output reg [2:0] tens_place,
 	     output reg [3:0] ones_place,
 	     output wire      CA
@@ -16,9 +16,9 @@ module cnt60(
 
    // ones place counter
    always_ff@(posedge clk)begin
-      if(!n_rst)
+      if(!n_rst | CLR)
 	ones_place <= '0;
-      else if(INC || CEN)begin
+      else if(INC | CEN)begin
 	 if(carry_flag1)
 	   ones_place <= '0;
 	 else
@@ -31,7 +31,7 @@ module cnt60(
 
    // tens place counter
    always_ff@(posedge clk)begin
-      if(!n_rst)
+      if(!n_rst | CLR)
 	tens_place <= '0;
       else if((INC&&carry_flag1) || CEN)begin
 	 if(carry_flag10)

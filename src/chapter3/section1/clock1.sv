@@ -6,7 +6,7 @@ module clock1(
 	      output wire [6:0] HEX0, HEX1, HEX2, HEX3
 	      );
 
-   
+
    wire 			clr, minup, secup;
    btn_in btn_in_inst(
 		      .clk(clk),
@@ -14,8 +14,8 @@ module clock1(
 		      .btn(BTN),
 		      .btn_out({clr, minup, secup})
 		      );
-
-
+   
+   
    
    wire 			en1hz;
    cnt1sec cnt1sec_inst(
@@ -23,9 +23,9 @@ module clock1(
 			.n_rst(n_rst),
 			.en1hz(en1hz)
 			);
-
    
-
+   
+   
    // sec count
    wire [2:0] 			sec_tens_place;
    wire [3:0] 			sec_ones_place;
@@ -34,7 +34,7 @@ module clock1(
 		   .clk(clk),
 		   .n_rst(n_rst),
 		   .CEN(en1hz),
-		   .DEC(0),
+		   .CLR(clr),
 		   .INC(secup),
 		   .tens_place(sec_tens_place),
 		   .ones_place(sec_ones_place),
@@ -50,7 +50,7 @@ module clock1(
 		   .clk(clk),
 		   .n_rst(n_rst),
 		   .CEN(carry_sec),
-		   .DEC(0),
+		   .CLR(clr),
 		   .INC(minup),
 		   .tens_place(min_tens_place),
 		   .ones_place(min_ones_place),
