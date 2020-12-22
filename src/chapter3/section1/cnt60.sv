@@ -33,7 +33,7 @@ module cnt60(
    always_ff@(posedge clk)begin
       if(!n_rst | CLR)
 	tens_place <= '0;
-      else if((INC&&carry_flag1) || CEN)begin
+      else if((INC | CEN) && carry_flag1)begin
 	 if(carry_flag10)
 	   tens_place <= '0;
 	 else
