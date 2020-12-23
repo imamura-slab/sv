@@ -14,3 +14,4 @@ set_false_path -from * -to [get_ports {HEX1*}]
 set_false_path -from * -to [get_ports {HEX0*}]
 set_false_path -from * -to [get_ports {SW*}]
 
+
