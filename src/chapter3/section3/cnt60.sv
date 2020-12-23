@@ -11,7 +11,7 @@ module cnt60(
    
    wire 		      carry_flag1  = (ones_place==4'd9);
    wire 		      carry_flag10 = (tens_place==3'd5);
-   assign 		      CA = (carryflag1 & carry_flag1 & CEN);
+   assign 		      CA = (carry_flag1 & carry_flag10 & CEN);
 
 
    // ones place counter

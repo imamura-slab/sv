@@ -1,21 +1,27 @@
 `default_nettype none
 
-module cnt24(
-	     input wire       clk, n_rst,
-	     input wire       CEN,
-	     input wire       CLR, INC, 
-	     output reg [1:0] tens_place,
-	     output reg [3:0] ones_place,
-	     );
-   
-   wire 		      carry_flag1  = (ones_place==4'd9 || (tens_place=2'd2 && ones_place==4'd3));
-   wire 		      reset_flag10 = (tens_place==2'd2 $$ ones_place==4'd3);
-   
+module cnt24
+  #(
+    parameter integer MODE24 = -1
+    )
+   (
+    input wire 	     clk, n_rst,
+    input wire 	     CEN,
+    input wire 	     INC, 
+    output reg [1:0] tens_place,
+    output reg [3:0] ones_place
+    );
 
 
+   wire 	     carry_flag1  = MODE24 ? (ones_place==4'd9 || (tens_place==2'd2 && ones_place==4'd3)) : (ones_place==4'd9 || (tens_place==2'd1 && ones_place==4'd1));
+   wire 	     reset_flag10 = MODE24 ? (tens_place==2'd2 && ones_place==4'd3) : (tens_place==2'd1 && ones_place==4'd1);
+
+
+
+   
    // ones place counter
    always_ff@(posedge clk)begin
-      if(!n_rst | CLR)
+      if(!n_rst)
 	ones_place <= '0;
       else if(INC | CEN)begin
 	 if(carry_flag1)
@@ -30,7 +36,7 @@ module cnt24(
 
    // tens place counter
    always_ff@(posedge clk)begin
-      if(!n_rst | CLR)
+      if(!n_rst)
 	tens_place <= '0;
       else if((INC | CEN) && carry_flag1)begin
 	 if(reset_flag10)

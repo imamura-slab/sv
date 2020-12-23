@@ -7,9 +7,9 @@ module btn_in(
 	      );
 
    parameter integer 	       CYCLE = 1250000; //40Hz : 50MHz/40Hz = 1250000
-   reg [$clog2(FREQ+1)-1:0]    cnt;
+   reg [$clog2(CYCLE+1)-1:0]    cnt;
 
-   wire 		       en40hz = (cnt==FREQ-1);
+   wire 		       en40hz = (cnt==CYCLE-1);
    // 40Hz
    always_ff@(posedge clk)begin
       if(!n_rst)

@@ -1,10 +1,11 @@
 `default_nettype none
 
 module clock24(
-	      input wire 	clk, rst,
-	      input wire [2:0] 	BTN,
-	      output wire [6:0] HEX0, HEX1, HEX2, HEX3
-	      );
+	       input wire 	 clk, n_rst,
+	       input wire [2:0]  BTN,
+	       input wire [1:0]  SW,
+	       output wire [7:0] HEX0, HEX1
+	       );
    
 
    wire 			MODE, SELECT, ADJUST;
@@ -12,7 +13,7 @@ module clock24(
 		      .clk(clk),
 		      .n_rst(n_rst),
 		      .btn(BTN),
-		      .btn_out({mode, select, adjust})
+		      .btn_out({MODE, SELECT, ADJUST})
 		      );
    
    
@@ -29,6 +30,7 @@ module clock24(
 
    // state machine
    wire 			SECINC, MININC, HOURINC;
+   wire 			SECON, MINON, HOURON;
    state state_inst(
 		    .clk(clk),
 		    .n_rst(n_rst),
@@ -58,7 +60,7 @@ module clock24(
 		   .ones_place(sec_ones_place),
 		   .CA(CA_sec)
 		   );
-
+   
 
    // min count
    wire [2:0] 			min_tens_place;
@@ -75,29 +77,86 @@ module clock24(
 		   );
 
 
-
+   
    // hour count
-   wire [1:0] 			hour_tens_place;
-   wire [3:0] 			hour_ones_place;
-   cnt24 cnt24_hour(
-		    .clk(clk),
-		    .n_rst(n_rst),
-		    .CEN(CA_min),
-		    .INC(HOURINC),
-		    .tens_place(hour_tens_place),
-		    .ones_place(hour_ones_place)
-		    );
+   wire [1:0] 			hour24_tens_place;
+   wire [3:0] 			hour24_ones_place;
+   cnt24 #(.MODE24(1)) cnt24_hour(
+				  .clk(clk),
+				  .n_rst(n_rst),
+				  .CEN(CA_min),
+				  .INC(HOURINC),
+				  .tens_place(hour24_tens_place),
+				  .ones_place(hour24_ones_place)
+				  );
+
+   wire [1:0] 			hour12_tens_place;
+   wire [3:0] 			hour12_ones_place;
+   cnt24 #(.MODE24(0)) cnt12_hour(
+				  .clk(clk),
+				  .n_rst(n_rst),
+				  .CEN(CA_min),
+				  .INC(HOURINC),
+				  .tens_place(hour12_tens_place),
+				  .ones_place(hour12_ones_place)
+				  );
+   
 
    
 
-   // 7seg
-   7seg_deg sec1  (.DIN(sec_ones_place),  .EN(SECON),  .HEX(HEX0));
-   7seg_deg sec10 (.DIN(sec_tens_place),  .EN(SECON),  .HEX(HEX1));
-   7seg_deg min1  (.DIN(min_ones_place),  .EN(MINON),  .HEX(HEX2));
-   7seg_deg min10 (.DIN(min_tens_place),  .EN(MINON),  .HEX(HEX3));
-   7seg_deg hour1 (.DIN(hour_ones_place), .EN(HOURON), .HEX(HEX4));
-   7seg_deg hour10(.DIN(hour_tens_place), .EN(HOURON), .HEX(HEX5));
 
+   // [select] display on 7seg
+   parameter integer 		SEC    = 2'b00;
+   parameter integer 		MIN    = 2'b01;
+   parameter integer 		HOUR24 = 2'b10;
+   parameter integer 		HOUR12 = 2'b11;
+
+   reg [3:0] 			ones_place;
+   reg [2:0] 			tens_place;
+   reg 				ON;
+   wire [3:0] 			ones_place_wire;
+   wire [2:0] 			tens_place_wire;
+   wire 			ON_wire;
+ 			
+   always_comb begin
+      case(SW)
+	SEC:begin
+	   ones_place = sec_ones_place;
+	   tens_place = sec_tens_place;
+	   ON = SECON;
+	end
+	MIN:begin
+	   ones_place = min_ones_place;
+	   tens_place = min_tens_place;
+	   ON = MINON;
+	end
+	HOUR24:begin
+	   ones_place = hour24_ones_place;
+	   tens_place = hour24_tens_place;
+	   ON = HOURON;
+	end
+	HOUR12:begin
+	   ones_place = hour12_ones_place;
+	   tens_place = hour12_tens_place;
+	   ON = HOURON;
+	end
+	default:begin
+	   ones_place = 4'bxxxx;
+	   tens_place = 3'bxxx;
+	   ON = 1'bx;
+	end
+      endcase // case (SW)
+   end // always_comb
+   assign ones_place_wire = ones_place;
+   assign tens_place_wire = tens_place;
+   assign ON_wire = ON;
+   
+
+   // 7seg
+   decord_7seg ones(.DIN(ones_place_wire),  .EN(ON_wire),  .HEX(HEX0));
+   decord_7seg tens(.DIN(tens_place_wire),  .EN(ON_wire),  .HEX(HEX1));
+
+   
    
 endmodule // clock24
 
