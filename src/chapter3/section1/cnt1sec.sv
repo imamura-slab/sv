@@ -1,7 +1,7 @@
 `default_nettype none
 
 module cnt1sec(
-	       input wire clk, n_rst,
+	       input wire  clk, n_rst,
 	       output wire en1hz
 	       );
    
